@@ -1,0 +1,140 @@
+{
+  "appInfo": {
+    "bundleId": "com.billiardmaster.3cushion",
+    "version": "1.0.0",
+    "buildNumber": "1",
+    "minimumOSVersion": {
+      "ios": "15.0",
+      "android": "26"
+    }
+  },
+  
+  "multilingual": {
+    "ko": {
+      "name": "3쿠션 당구 마스터",
+      "subtitle": "AI와 AR로 배우는 당구의 새로운 차원",
+      "description": "🎱 세계 최초 AI 기반 3쿠션 당구 학습 플랫폼\n\n• 📐 정밀한 물리 시뮬레이션으로 완벽한 경로 계산\n• 🤖 개인 맞춤 AI 코치가 실력 향상 가이드 \n• 📱 증강현실(AR)로 실제 당구대에서 최적 경로 확인\n• 🌐 전 세계 플레이어와 실시간 대전\n• 🏆 다양한 토너먼트와 도전과제\n• 📊 상세한 통계와 성장 분석\n\n초보자부터 프로까지, 누구나 쉽게 3쿠션 당구의 아름다운 기하학을 마스터할 수 있습니다.",
+      "keywords": [
+        "당구",
+        "3쿠션",
+        "당구게임",
+        "당구연습",
+        "AI 코치",
+        "AR 증강현실",
+        "당구 시뮬레이션",
+        "실시간 대전",
+        "당구 교육",
+        "스포츠 게임"
+      ],
+      "whatsNew": "🎉 3쿠션 당구 마스터 글로벌 출시!\n\n✨ 새로운 기능:\n• AR 테이블 스캔 기능으로 실제 당구대 분석\n• 실시간 멀티플레이어 대전 시스템\n• 4개국 언어 지원 (한/영/일/중)\n• 프리미엄 구독 서비스\n• 글로벌 토너먼트 시스템\n\n🔧 개선사항:\n• 물리 엔진 정확도 99% 달성\n• 앱 성능 30% 향상\n• 사용자 인터페이스 완전 개편"
+    },
+    
+    "en": {
+      "name": "3-Cushion Billiard Master",
+      "subtitle": "Learn billiards in a new dimension with AI & AR",
+      "description": "🎱 World's first AI-powered 3-cushion billiards learning platform\n\n• 📐 Perfect path calculation with precise physics simulation\n• 🤖 Personal AI coach guides your skill improvement\n• 📱 Augmented Reality (AR) shows optimal paths on real tables\n• 🌐 Real-time matches with players worldwide\n• 🏆 Various tournaments and challenges\n• 📊 Detailed statistics and growth analysis\n\nFrom beginners to pros, anyone can easily master the beautiful geometry of 3-cushion billiards.",
+      "keywords": [
+        "billiards",
+        "3-cushion",
+        "pool game",
+        "billiard practice",
+        "AI coach",
+        "AR augmented reality",
+        "billiard simulation",
+        "multiplayer",
+        "billiard training",
+        "sports game"
+      ],
+      "whatsNew": "🎉 3-Cushion Billiard Master Global Launch!\n\n✨ New Features:\n• AR table scanning for real billiard table analysis\n• Real-time multiplayer battle system\n• 4-language support (KR/EN/JP/CN)\n• Premium subscription service\n• Global tournament system\n\n🔧 Improvements:\n• Physics engine 99% accuracy achieved\n• 30% app performance boost\n• Complete user interface redesign"
+    },
+    
+    "ja": {
+      "name": "3クッションビリヤードマスター",
+      "subtitle": "AIとARで学ぶビリヤードの新次元",
+      "description": "🎱 世界初のAI搭載3クッションビリヤード学習プラットフォーム\n\n• 📐 精密な物理シミュレーションによる完璧な軌道計算\n• 🤖 個人専用AIコーチが上達をガイド\n• 📱 拡張現実(AR)で実際のテーブル上に最適軌道を表示\n• 🌐 世界中のプレイヤーとリアルタイム対戦\n• 🏆 多様なトーナメントとチャレンジ\n• 📊 詳細な統計と成長分析\n\n初心者からプロまで、誰でも簡単に3クッションビリヤードの美しい幾何学をマスターできます。",
+      "keywords": [
+        "ビリヤード",
+        "3クッション",
+        "ビリヤードゲーム",
+        "ビリヤード練習",
+        "AIコーチ",
+        "AR拡張現実",
+        "ビリヤードシミュレーション",
+        "マルチプレイヤー",
+        "ビリヤード教育",
+        "スポーツゲーム"
+      ],
+      "whatsNew": "🎉 3クッションビリヤードマスター グローバルローンチ!\n\n✨ 新機能:\n• ARテーブルスキャンで実際のビリヤード台を分析\n• リアルタイムマルチプレイヤー対戦システム\n• 4カ国語対応（韓/英/日/中）\n• プレミアム購読サービス\n• グローバルトーナメントシステム\n\n🔧 改善点:\n• 物理エンジン精度99%達成\n• アプリパフォーマンス30%向上\n• ユーザーインターフェース完全リニューアル"
+    },
+    
+    "zh": {
+      "name": "三颗星台球大师",
+      "subtitle": "用AI和AR学习台球的新境界",
+      "description": "🎱 全球首个AI驱动的三颗星台球学习平台\n\n• 📐 精确物理模拟实现完美路径计算\n• 🤖 个人专属AI教练指导技能提升\n• 📱 增强现实(AR)在真实球桌上显示最优路径\n• 🌐 与全球玩家实时对战\n• 🏆 多样化锦标赛和挑战\n• 📊 详细统计和成长分析\n\n从初学者到专业选手，任何人都能轻松掌握三颗星台球的美妙几何学。",
+      "keywords": [
+        "台球",
+        "三颗星",
+        "台球游戏",
+        "台球练习",
+        "AI教练",
+        "AR增强现实",
+        "台球模拟",
+        "多人游戏",
+        "台球教育",
+        "体育游戏"
+      ],
+      "whatsNew": "🎉 三颗星台球大师全球发布!\n\n✨ 新功能:\n• AR桌面扫描功能分析真实台球桌\n• 实时多人对战系统\n• 4语言支持（韩/英/日/中）\n• 高级订阅服务\n• 全球锦标赛系统\n\n🔧 改进:\n• 物理引擎精度达到99%\n• 应用性能提升30%\n• 用户界面完全重新设计"
+    }
+  },
+  
+  "categories": {
+    "primary": "Sports",
+    "secondary": ["Games", "Education", "Simulation"]
+  },
+  
+  "contentRating": {
+    "ios": "4+",
+    "android": "Everyone"
+  },
+  
+  "pricing": {
+    "model": "Freemium",
+    "inAppPurchases": true,
+    "subscriptions": [
+      {
+        "id": "premium_monthly",
+        "price": "$4.99",
+        "duration": "1 month"
+      },
+      {
+        "id": "pro_monthly", 
+        "price": "$19.99",
+        "duration": "1 month"
+      }
+    ]
+  },
+  
+  "supportInfo": {
+    "website": "https://billiardmaster.com",
+    "email": "support@billiardmaster.com",
+    "privacyPolicy": "https://billiardmaster.com/privacy",
+    "termsOfService": "https://billiardmaster.com/terms"
+  },
+  
+  "technicalRequirements": {
+    "ios": {
+      "minimumVersion": "15.0",
+      "recommendedVersion": "16.0+",
+      "compatibility": ["iPhone", "iPad"],
+      "requiredFeatures": ["Camera", "Accelerometer", "Gyroscope"],
+      "optionalFeatures": ["ARKit"]
+    },
+    "android": {
+      "minimumAPI": 26,
+      "recommendedAPI": 30,
+      "compatibility": ["Phone", "Tablet"],
+      "requiredFeatures": ["Camera", "Accelerometer", "Gyroscope"],
+      "optionalFeatures": ["ARCore"]
+    }
+  }
+}

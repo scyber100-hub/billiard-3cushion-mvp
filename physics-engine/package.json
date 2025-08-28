@@ -1,0 +1,22 @@
+{
+  "name": "billiard-physics-engine",
+  "version": "1.0.0",
+  "description": "3쿠션 당구 물리 계산 엔진",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.3",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  },
+  "keywords": ["billiards", "3cushion", "physics", "engine"],
+  "author": "Billiard3Cushion Team",
+  "license": "MIT"
+}

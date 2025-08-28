@@ -1,0 +1,5 @@
+{
+  "cueBall": { "id": "cue", "x": 100, "y": 140, "radius": 15, "color": "#ffffff" },
+  "object1": { "id": "object1", "x": 300, "y": 100, "radius": 15, "color": "#ffff00" },
+  "object2": { "id": "object2", "x": 450, "y": 180, "radius": 15, "color": "#ff0000" }
+}

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3쿠션 당구 마스터 - 웹 데모</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-circle"></i>
+                <h1>3쿠션 당구 마스터</h1>
+            </div>
+            <nav class="nav">
+                <a href="#demo" class="nav-link">데모 체험</a>
+                <a href="#features" class="nav-link">주요 기능</a>
+                <a href="#partnership" class="nav-link">파트너십</a>
+                <a href="#contact" class="nav-link">연락처</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 히어로 섹션 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>AI와 AR로 배우는<br><span class="highlight">3쿠션 당구</span></h2>
+                <p>세계 최초 AR 기반 당구 학습 플랫폼으로<br>당구의 아름다운 기하학을 마스터하세요</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollToDemo()">
+                        <i class="fas fa-play"></i>
+                        데모 체험하기
+                    </button>
+                    <button class="btn btn-secondary" onclick="showAppStore()">
+                        <i class="fas fa-download"></i>
+                        앱 다운로드
+                    </button>
+                </div>
+            </div>
+            <div class="hero-phone">
+                <div class="phone-mockup">
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <div class="battery">
+                                <i class="fas fa-battery-full"></i>
+                            </div>
+                        </div>
+                        <div class="app-screen" id="phone-screen">
+                            <div class="home-screen active">
+                                <h3>3쿠션 당구 마스터</h3>
+                                <div class="menu-grid">
+                                    <div class="menu-item" onclick="showPracticeMode()">
+                                        <i class="fas fa-crosshairs"></i>
+                                        <span>연습 모드</span>
+                                    </div>
+                                    <div class="menu-item" onclick="showARMode()">
+                                        <i class="fas fa-camera"></i>
+                                        <span>AR 스캔</span>
+                                    </div>
+                                    <div class="menu-item" onclick="showMultiplayer()">
+                                        <i class="fas fa-users"></i>
+                                        <span>친구 대전</span>
+                                    </div>
+                                    <div class="menu-item" onclick="showProfile()">
+                                        <i class="fas fa-user"></i>
+                                        <span>내 프로필</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 인터랙티브 데모 섹션 -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2>🎱 인터랙티브 데모 체험</h2>
+            <p>실제 앱처럼 직접 조작해보세요!</p>
+            
+            <div class="demo-container">
+                <div class="billiard-table" id="billiard-table">
+                    <div class="table-border">
+                        <div class="table-surface">
+                            <!-- 쿠션 -->
+                            <div class="cushion cushion-top"></div>
+                            <div class="cushion cushion-bottom"></div>
+                            <div class="cushion cushion-left"></div>
+                            <div class="cushion cushion-right"></div>
+                            
+                            <!-- 당구공들 -->
+                            <div class="ball white-ball" id="white-ball" style="left: 100px; top: 120px;">
+                                <span class="ball-number">⚪</span>
+                            </div>
+                            <div class="ball red-ball" id="red-ball" style="left: 400px; top: 120px;">
+                                <span class="ball-number">🔴</span>
+                            </div>
+                            <div class="ball yellow-ball" id="yellow-ball" style="left: 600px; top: 120px;">
+                                <span class="ball-number">🟡</span>
+                            </div>
+                            
+                            <!-- 경로 표시 -->
+                            <canvas id="path-canvas" width="800" height="300"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="calculatePath()">
+                            <i class="fas fa-calculator"></i>
+                            경로 계산
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetBalls()">
+                            <i class="fas fa-refresh"></i>
+                            리셋
+                        </button>
+                        <button class="btn btn-success" onclick="simulateShot()">
+                            <i class="fas fa-play"></i>
+                            샷 시뮬레이션
+                        </button>
+                    </div>
+                    
+                    <div class="demo-info">
+                        <div class="info-item">
+                            <strong>성공률:</strong> <span id="success-rate">85%</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>난이도:</strong> <span id="difficulty">중급</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>거리:</strong> <span id="distance">2.4m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demo-instructions">
+                    <h3>🎮 사용법</h3>
+                    <ul>
+                        <li><strong>드래그</strong>로 공 위치 조정</li>
+                        <li><strong>"경로 계산"</strong> 버튼으로 최적 경로 확인</li>
+                        <li><strong>"샷 시뮬레이션"</strong>으로 결과 미리보기</li>
+                        <li><strong>실시간</strong>으로 성공률과 난이도 표시</li>
+                    </ul>
+                    
+                    <div class="demo-features">
+                        <div class="feature-badge">
+                            <i class="fas fa-brain"></i>
+                            AI 분석
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-ruler-combined"></i>
+                            정밀 계산
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-chart-line"></i>
+                            실시간 피드백
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 주요 기능 섹션 -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2>🚀 혁신적인 주요 기능</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <h3>정밀 경로 계산</h3>
+                    <p>99% 정확도의 물리 엔진으로 3쿠션 최적 경로를 실시간 계산합니다.</p>
+                    <div class="feature-demo" onclick="showFeatureDemo('precision')">
+                        <span>데모 보기</span>
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>AR 테이블 스캔</h3>
+                    <p>실제 당구대를 카메라로 스캔하여 증강현실로 최적 경로를 표시합니다.</p>
+                    <div class="feature-demo" onclick="showFeatureDemo('ar')">
+                        <span>데모 보기</span>
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI 맞춤 코칭</h3>
+                    <p>개인 실력을 분석하여 맞춤형 연습 계획과 조언을 제공합니다.</p>
+                    <div class="feature-demo" onclick="showFeatureDemo('ai')">
+                        <span>데모 보기</span>
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>실시간 멀티플레이어</h3>
+                    <p>전 세계 플레이어와 실시간으로 경쟁하고 토너먼트에 참가하세요.</p>
+                    <div class="feature-demo" onclick="showFeatureDemo('multiplayer')">
+                        <span>데모 보기</span>
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 당구장 파트너십 섹션 -->
+    <section id="partnership" class="partnership-section">
+        <div class="container">
+            <div class="partnership-content">
+                <div class="partnership-text">
+                    <h2>🤝 당구장 파트너십</h2>
+                    <h3>대기 시간을 수익으로 바꿔드립니다</h3>
+                    
+                    <div class="benefits">
+                        <div class="benefit-item">
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <strong>매출 증대</strong>
+                                <p>재방문율 30% 증가, 젊은 고객층 유입</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-smile"></i>
+                            <div>
+                                <strong>고객 만족도 향상</strong>
+                                <p>대기 시간이 즐거운 학습 시간으로 변화</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-trophy"></i>
+                            <div>
+                                <strong>차별화된 서비스</strong>
+                                <p>지역 내 유일한 스마트 당구장으로 브랜딩</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="partnership-offer">
+                        <div class="offer-highlight">
+                            <h4>🎁 특별 제안</h4>
+                            <ul>
+                                <li>✅ 초기 설치비 <strong>무료</strong></li>
+                                <li>✅ 태블릿 3-4대 <strong>무료 제공</strong></li>
+                                <li>✅ 1개월 <strong>완전 무료</strong> 체험</li>
+                                <li>✅ 언제든 <strong>위약금 없이</strong> 해지 가능</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="partnership-demo">
+                    <div class="tablet-mockup">
+                        <div class="tablet-screen">
+                            <div class="tablet-app">
+                                <div class="tablet-header">
+                                    <h4>🏆 XX당구장 리더보드</h4>
+                                </div>
+                                <div class="leaderboard">
+                                    <div class="leaderboard-item rank-1">
+                                        <span class="rank">1</span>
+                                        <span class="name">김당구</span>
+                                        <span class="score">2,450</span>
+                                    </div>
+                                    <div class="leaderboard-item rank-2">
+                                        <span class="rank">2</span>
+                                        <span class="name">이3쿠션</span>
+                                        <span class="score">2,230</span>
+                                    </div>
+                                    <div class="leaderboard-item rank-3">
+                                        <span class="rank">3</span>
+                                        <span class="name">박마스터</span>
+                                        <span class="score">2,120</span>
+                                    </div>
+                                </div>
+                                <div class="tablet-stats">
+                                    <div class="stat">
+                                        <strong>156</strong>
+                                        <span>오늘 플레이어</span>
+                                    </div>
+                                    <div class="stat">
+                                        <strong>23</strong>
+                                        <span>현재 대기</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 연락처 섹션 -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2>📞 문의하기</h2>
+            <p>궁금한 점이나 파트너십 문의는 언제든지 연락주세요!</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>전화 문의</strong>
+                        <p>010-1234-5678</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>이메일</strong>
+                        <p>contact@billiardmaster.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-kakao"></i>
+                    <div>
+                        <strong>카카오톡</strong>
+                        <p>@billiardmaster</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-form">
+                <h3>빠른 문의</h3>
+                <form onclick="showContactForm()">
+                    <div class="form-row">
+                        <input type="text" placeholder="이름" required>
+                        <input type="tel" placeholder="연락처" required>
+                    </div>
+                    <select required>
+                        <option value="">문의 유형 선택</option>
+                        <option value="partnership">당구장 파트너십</option>
+                        <option value="demo">데모 요청</option>
+                        <option value="investment">투자 문의</option>
+                        <option value="other">기타</option>
+                    </select>
+                    <textarea placeholder="문의 내용" rows="4"></textarea>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        문의하기
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-circle"></i>
+                    <h3>3쿠션 당구 마스터</h3>
+                </div>
+                <div class="footer-links">
+                    <a href="#privacy">개인정보처리방침</a>
+                    <a href="#terms">이용약관</a>
+                    <a href="#partnership">파트너십</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 3쿠션 당구 마스터. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 모달들 -->
+    <div id="feature-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

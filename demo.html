@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3쿠션 당구 분석기 MVP 데모</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #2a2a2a;
+            border-bottom: 2px solid #333;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .table-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+        }
+        
+        .table-container {
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #0d5c0d;
+        }
+        
+        #billiardCanvas {
+            display: block;
+            cursor: grab;
+        }
+        
+        #billiardCanvas:active {
+            cursor: grabbing;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            padding: 16px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-ball {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #666;
+        }
+        
+        .panel {
+            width: 350px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h3 {
+            margin-bottom: 16px;
+        }
+        
+        .path-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .path-item {
+            background: #3a3a3a;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .path-item:hover {
+            background: #4a4a4a;
+            transform: translateY(-1px);
+        }
+        
+        .path-item.selected {
+            border-color: #ff6b6b;
+            background: #4a2a2a;
+        }
+        
+        .path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .difficulty-badge {
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .easy { background: #4caf50; }
+        .medium { background: #ff9800; }
+        .hard { background: #f44336; }
+        
+        .status {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+        
+        .error {
+            background: #f44336;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🎱 3쿠션 당구 분석기 MVP</h1>
+        <p>공의 위치를 드래그하여 설정하고, 최적의 3쿠션 경로를 찾아보세요!</p>
+    </header>
+    
+    <main class="container">
+        <section class="table-section">
+            <div class="controls">
+                <button id="calculateBtn" class="btn btn-primary">경로 계산</button>
+                <button id="resetBtn" class="btn btn-secondary">초기화</button>
+            </div>
+            
+            <div id="errorDiv" class="error" style="display: none;"></div>
+            
+            <div class="table-container">
+                <canvas id="billiardCanvas" width="568" height="284"></canvas>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-ball" style="background: #ffffff;"></div>
+                    <span>큐볼 (흰색)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-ball" style="background: #ffff00;"></div>
+                    <span>목적구 1 (노란색)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-ball" style="background: #ff0000;"></div>
+                    <span>목적구 2 (빨간색)</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="panel">
+            <h3>분석된 경로</h3>
+            <div id="pathPanel">
+                <div class="status">
+                    <p>공의 위치를 설정하고 경로를 계산해보세요.</p>
+                    <p>📊 최대 5가지 최적 경로를 제공합니다.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 당구대 및 공 설정
+        const TABLE_WIDTH = 568;
+        const TABLE_HEIGHT = 284;
+        const BALL_RADIUS = 15;
+        
+        let balls = [
+            { id: 'cue', x: 100, y: TABLE_HEIGHT / 2, radius: BALL_RADIUS, color: '#ffffff' },
+            { id: 'object1', x: 300, y: TABLE_HEIGHT / 2 - 50, radius: BALL_RADIUS, color: '#ffff00' },
+            { id: 'object2', x: 450, y: TABLE_HEIGHT / 2 + 30, radius: BALL_RADIUS, color: '#ff0000' }
+        ];
+        
+        let paths = [];
+        let selectedPath = null;
+        let isDragging = null;
+        let dragOffset = { x: 0, y: 0 };
+        
+        // Canvas 설정
+        const canvas = document.getElementById('billiardCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 당구대 그리기
+        function drawTable() {
+            // 테이블 배경
+            ctx.fillStyle = '#0d5c0d';
+            ctx.fillRect(0, 0, TABLE_WIDTH, TABLE_HEIGHT);
+            
+            // 쿠션
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(4, 4, TABLE_WIDTH - 8, TABLE_HEIGHT - 8);
+            
+            const cushionWidth = 12;
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(0, 0, TABLE_WIDTH, cushionWidth);
+            ctx.fillRect(0, TABLE_HEIGHT - cushionWidth, TABLE_WIDTH, cushionWidth);
+            ctx.fillRect(0, 0, cushionWidth, TABLE_HEIGHT);
+            ctx.fillRect(TABLE_WIDTH - cushionWidth, 0, cushionWidth, TABLE_HEIGHT);
+        }
+        
+        // 공 그리기
+        function drawBall(ball) {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            if (ball.id === 'cue') {
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius * 0.3, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        // 경로 그리기
+        function drawPath(path, isSelected = false) {
+            if (!path.points || path.points.length < 2) return;
+            
+            ctx.strokeStyle = isSelected ? '#ff6b6b' : 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = isSelected ? 3 : 2;
+            ctx.setLineDash(isSelected ? [] : [5, 5]);
+            
+            ctx.beginPath();
+            ctx.moveTo(path.points[0].x, path.points[0].y);
+            
+            for (let i = 1; i < path.points.length; i++) {
+                ctx.lineTo(path.points[i].x, path.points[i].y);
+            }
+            
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // 전체 그리기
+        function draw() {
+            ctx.clearRect(0, 0, TABLE_WIDTH, TABLE_HEIGHT);
+            drawTable();
+            
+            // 경로 그리기
+            paths.forEach(path => {
+                if (selectedPath && path.id === selectedPath.id) {
+                    drawPath(path, true);
+                } else if (!selectedPath) {
+                    drawPath(path, false);
+                }
+            });
+            
+            // 공 그리기
+            balls.forEach(drawBall);
+        }
+        
+        // 마우스 이벤트 처리
+        function getBallAtPosition(x, y) {
+            return balls.find(ball => {
+                const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
+                return distance <= ball.radius;
+            });
+        }
+        
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            const ball = getBallAtPosition(pos.x, pos.y);
+            
+            if (ball) {
+                isDragging = ball.id;
+                dragOffset = { x: pos.x - ball.x, y: pos.y - ball.y };
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const pos = getMousePos(e);
+            const ball = balls.find(b => b.id === isDragging);
+            
+            if (ball) {
+                ball.x = Math.max(BALL_RADIUS, Math.min(TABLE_WIDTH - BALL_RADIUS, pos.x - dragOffset.x));
+                ball.y = Math.max(BALL_RADIUS, Math.min(TABLE_HEIGHT - BALL_RADIUS, pos.y - dragOffset.y));
+                
+                // 경로 초기화
+                paths = [];
+                selectedPath = null;
+                updatePathPanel();
+                draw();
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = null;
+            dragOffset = { x: 0, y: 0 };
+        });
+        
+        // API 호출
+        async function calculatePaths() {
+            const errorDiv = document.getElementById('errorDiv');
+            const calculateBtn = document.getElementById('calculateBtn');
+            
+            errorDiv.style.display = 'none';
+            calculateBtn.disabled = true;
+            calculateBtn.textContent = '계산 중...';
+            
+            // 로딩 상태 표시
+            document.getElementById('pathPanel').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>최적 경로를 계산하고 있습니다...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/paths/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cueBall: balls.find(b => b.id === 'cue'),
+                        object1: balls.find(b => b.id === 'object1'),
+                        object2: balls.find(b => b.id === 'object2'),
+                        table: {
+                            width: TABLE_WIDTH,
+                            height: TABLE_HEIGHT,
+                            cushionRestitution: 0.8
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '서버 오류가 발생했습니다.');
+                }
+                
+                paths = data.data.paths || [];
+                selectedPath = paths.length > 0 ? paths[0] : null;
+                
+                updatePathPanel();
+                draw();
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                errorDiv.textContent = `⚠️ ${error.message}`;
+                errorDiv.style.display = 'block';
+                
+                // 데모용 가짜 데이터
+                paths = generateDemoPaths();
+                selectedPath = paths[0];
+                updatePathPanel();
+                draw();
+            } finally {
+                calculateBtn.disabled = false;
+                calculateBtn.textContent = '경로 계산';
+            }
+        }
+        
+        // 데모용 가짜 경로 생성
+        function generateDemoPaths() {
+            const cueBall = balls.find(b => b.id === 'cue');
+            const object1 = balls.find(b => b.id === 'object1');
+            
+            return [
+                {
+                    id: 'demo_path_1',
+                    points: [
+                        { x: cueBall.x, y: cueBall.y, type: 'ball' },
+                        { x: 200, y: 50, type: 'cushion' },
+                        { x: 400, y: 200, type: 'cushion' },
+                        { x: 300, y: 100, type: 'cushion' },
+                        { x: object1.x, y: object1.y, type: 'ball' }
+                    ],
+                    cushionCount: 3,
+                    difficulty: 'medium',
+                    successRate: 0.75,
+                    description: '3쿠션 경로 (성공률: 75%)'
+                },
+                {
+                    id: 'demo_path_2',
+                    points: [
+                        { x: cueBall.x, y: cueBall.y, type: 'ball' },
+                        { x: 150, y: 250, type: 'cushion' },
+                        { x: 500, y: 50, type: 'cushion' },
+                        { x: 350, y: 150, type: 'cushion' },
+                        { x: object1.x, y: object1.y, type: 'ball' }
+                    ],
+                    cushionCount: 4,
+                    difficulty: 'hard',
+                    successRate: 0.45,
+                    description: '4쿠션 경로 (성공률: 45%)'
+                }
+            ];
+        }
+        
+        // 패널 업데이트
+        function updatePathPanel() {
+            const panel = document.getElementById('pathPanel');
+            
+            if (paths.length === 0) {
+                panel.innerHTML = `
+                    <div class="status">
+                        <p>공의 위치를 설정하고 경로를 계산해보세요.</p>
+                        <p>📊 최대 5가지 최적 경로를 제공합니다.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            panel.innerHTML = `
+                <div class="path-list">
+                    ${paths.map((path, index) => `
+                        <div class="path-item ${selectedPath?.id === path.id ? 'selected' : ''}" 
+                             onclick="selectPath('${path.id}')">
+                            <div class="path-header">
+                                <span style="font-weight: bold; font-size: 18px;">#${index + 1}</span>
+                                <span class="difficulty-badge ${path.difficulty}">${getDifficultyText(path.difficulty)}</span>
+                            </div>
+                            <div style="display: flex; gap: 16px; margin-bottom: 8px;">
+                                <div><span style="color: #888;">쿠션:</span> <strong>${path.cushionCount}회</strong></div>
+                                <div><span style="color: #888;">성공률:</span> <strong>${Math.round(path.successRate * 100)}%</strong></div>
+                            </div>
+                            <div style="color: #ccc; font-size: 13px; margin-bottom: 12px;">
+                                ${path.description}
+                            </div>
+                            <div style="height: 4px; background: #444; border-radius: 2px; overflow: hidden;">
+                                <div style="height: 100%; width: ${path.successRate * 100}%; background: linear-gradient(90deg, #f44336 0%, #ff9800 50%, #4caf50 100%);"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function getDifficultyText(difficulty) {
+            switch (difficulty) {
+                case 'easy': return '쉬움';
+                case 'medium': return '보통';
+                case 'hard': return '어려움';
+                default: return '불명';
+            }
+        }
+        
+        function selectPath(pathId) {
+            selectedPath = paths.find(p => p.id === pathId);
+            updatePathPanel();
+            draw();
+        }
+        
+        // 초기화
+        function resetBalls() {
+            balls = [
+                { id: 'cue', x: 100, y: TABLE_HEIGHT / 2, radius: BALL_RADIUS, color: '#ffffff' },
+                { id: 'object1', x: 300, y: TABLE_HEIGHT / 2 - 50, radius: BALL_RADIUS, color: '#ffff00' },
+                { id: 'object2', x: 450, y: TABLE_HEIGHT / 2 + 30, radius: BALL_RADIUS, color: '#ff0000' }
+            ];
+            paths = [];
+            selectedPath = null;
+            document.getElementById('errorDiv').style.display = 'none';
+            updatePathPanel();
+            draw();
+        }
+        
+        // 이벤트 리스너
+        document.getElementById('calculateBtn').addEventListener('click', calculatePaths);
+        document.getElementById('resetBtn').addEventListener('click', resetBalls);
+        
+        // 전역 함수
+        window.selectPath = selectPath;
+        
+        // 초기 그리기
+        draw();
+    </script>
+</body>
+</html>
