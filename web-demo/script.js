@@ -2,9 +2,9 @@
 let isDragging = false;
 let currentBall = null;
 let balls = {
-    white: { x: 100, y: 120, element: null },
-    red: { x: 400, y: 120, element: null },
-    yellow: { x: 600, y: 120, element: null }
+    white: { x: 150, y: 200, element: null },
+    red: { x: 500, y: 200, element: null },
+    yellow: { x: 750, y: 200, element: null }
 };
 
 // DOM이 로드되면 초기화
@@ -66,15 +66,15 @@ function drag(e) {
         clientY = e.clientY;
     }
     
-    // 테이블 내에서의 상대 위치 계산
-    let x = clientX - rect.left - 15; // 공 반지름 고려
-    let y = clientY - rect.top - 15;
+    // 테이블 내에서의 상대 위치 계산 (22px 공 크기 고려)
+    let x = clientX - rect.left - 11; // 공 반지름 고려
+    let y = clientY - rect.top - 11;
     
-    // 경계 제한 (쿠션 고려)
+    // 경계 제한 (쿠션 고려) - 새로운 테이블 크기와 공 크기에 맞춤
     const minX = 25; // 왼쪽 쿠션
-    const maxX = rect.width - 45; // 오른쪽 쿠션
+    const maxX = rect.width - 36; // 오른쪽 쿠션 (22px 공 + 마진)
     const minY = 25; // 위쪽 쿠션
-    const maxY = rect.height - 45; // 아래쪽 쿠션
+    const maxY = rect.height - 36; // 아래쪽 쿠션
     
     x = Math.max(minX, Math.min(maxX, x));
     y = Math.max(minY, Math.min(maxY, y));
@@ -136,13 +136,13 @@ function calculatePath() {
     // 캔버스 클리어
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 현재 공 위치 가져오기
-    const whiteX = parseInt(balls.white.element.style.left) + 15;
-    const whiteY = parseInt(balls.white.element.style.top) + 15;
-    const redX = parseInt(balls.red.element.style.left) + 15;
-    const redY = parseInt(balls.red.element.style.top) + 15;
-    const yellowX = parseInt(balls.yellow.element.style.left) + 15;
-    const yellowY = parseInt(balls.yellow.element.style.top) + 15;
+    // 현재 공 위치 가져오기 (22px 공 크기에 맞춰 중앙점 계산)
+    const whiteX = parseInt(balls.white.element.style.left) + 11;
+    const whiteY = parseInt(balls.white.element.style.top) + 11;
+    const redX = parseInt(balls.red.element.style.left) + 11;
+    const redY = parseInt(balls.red.element.style.top) + 11;
+    const yellowX = parseInt(balls.yellow.element.style.left) + 11;
+    const yellowY = parseInt(balls.yellow.element.style.top) + 11;
     
     // 테이블 크기
     const tableWidth = canvas.width;
@@ -246,7 +246,7 @@ function simulateShot(white, red, yellow, table, angle) {
         
         // 공 충돌 검사 (빨간공)
         const distToRed = Math.sqrt((ballPos.x - red.x) ** 2 + (ballPos.y - red.y) ** 2);
-        if (distToRed < 30 && !cushionHit) { // 공 반지름 고려
+        if (distToRed < 22 && !cushionHit) { // 공 반지름 고려 (22px 공 크기)
             ballHits++;
             // 충돌 벡터 계산
             const dx = ballPos.x - red.x;
@@ -265,7 +265,7 @@ function simulateShot(white, red, yellow, table, angle) {
         
         // 공 충돌 검사 (노란공)
         const distToYellow = Math.sqrt((ballPos.x - yellow.x) ** 2 + (ballPos.y - yellow.y) ** 2);
-        if (distToYellow < 30 && !cushionHit) {
+        if (distToYellow < 22 && !cushionHit) { // 공 반지름 고려 (22px 공 크기)
             ballHits++;
             const dx = ballPos.x - yellow.x;
             const dy = ballPos.y - yellow.y;
@@ -388,14 +388,14 @@ function updateShotInfo(pathData) {
     showToast('정밀한 물리 엔진으로 3쿠션 경로를 계산했습니다!');
 }
 
-// 공 위치 리셋
+// 공 위치 리셋 (새로운 테이블 크기에 맞춘 위치)
 function resetBalls() {
-    balls.white.element.style.left = '100px';
-    balls.white.element.style.top = '120px';
-    balls.red.element.style.left = '400px';
-    balls.red.element.style.top = '120px';
-    balls.yellow.element.style.left = '600px';
-    balls.yellow.element.style.top = '120px';
+    balls.white.element.style.left = '150px';
+    balls.white.element.style.top = '200px';
+    balls.red.element.style.left = '500px';
+    balls.red.element.style.top = '200px';
+    balls.yellow.element.style.left = '750px';
+    balls.yellow.element.style.top = '200px';
     
     // 캔버스 클리어
     const canvas = document.getElementById('path-canvas');
