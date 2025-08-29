@@ -192,4 +192,4 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 확인하세요.
 
 ---
 
-**Made with ❤️ for 3쿠션 당구 애호가들**
+**Made with ❤️ for 3쿠션 당구 애호가들**# billiard-3cushion-mvp
