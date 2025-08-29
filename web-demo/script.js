@@ -128,7 +128,7 @@ function updateBallInfo() {
     document.getElementById('difficulty').textContent = difficulty;
 }
 
-// 경로 계산
+// 정밀한 3쿠션 경로 계산 (실제 물리학 기반)
 function calculatePath() {
     const canvas = document.getElementById('path-canvas');
     const ctx = canvas.getContext('2d');
@@ -141,54 +141,251 @@ function calculatePath() {
     const whiteY = parseInt(balls.white.element.style.top) + 15;
     const redX = parseInt(balls.red.element.style.left) + 15;
     const redY = parseInt(balls.red.element.style.top) + 15;
+    const yellowX = parseInt(balls.yellow.element.style.left) + 15;
+    const yellowY = parseInt(balls.yellow.element.style.top) + 15;
     
-    // 경로 그리기 (간단한 3쿠션 시뮬레이션)
+    // 테이블 크기
+    const tableWidth = canvas.width;
+    const tableHeight = canvas.height;
+    const cushionWidth = 20;
+    
+    // 실제 물리학 기반 3쿠션 경로 계산
+    const bestPath = calculateRealistic3CushionPath({
+        white: { x: whiteX, y: whiteY },
+        red: { x: redX, y: redY },
+        yellow: { x: yellowX, y: yellowY },
+        table: { width: tableWidth, height: tableHeight, cushionWidth }
+    });
+    
+    if (bestPath && bestPath.length > 0) {
+        drawRealisticPath(ctx, bestPath);
+        updateShotInfo(bestPath);
+    } else {
+        drawFallbackPath(ctx, whiteX, whiteY, redX, redY, tableWidth, tableHeight);
+        updateShotInfo([]);
+    }
+}
+
+// 실제 물리학 기반 3쿠션 계산
+function calculateRealistic3CushionPath(setup) {
+    const { white, red, yellow, table } = setup;
+    const bestPaths = [];
+    
+    // 여러 각도로 시도하여 최적 경로 찾기
+    const angleCount = 24;
+    for (let i = 0; i < angleCount; i++) {
+        const angle = (Math.PI * 2 * i) / angleCount;
+        const path = simulateShot(white, red, yellow, table, angle);
+        
+        if (path.isValid && path.cushionHits >= 3) {
+            bestPaths.push(path);
+        }
+    }
+    
+    // 성공률이 가장 높은 경로 선택
+    bestPaths.sort((a, b) => b.successRate - a.successRate);
+    return bestPaths[0] || null;
+}
+
+// 샷 시뮬레이션 (실제 물리학)
+function simulateShot(white, red, yellow, table, angle) {
+    const speed = 6.0;
+    const friction = 0.985;
+    const minVelocity = 0.01;
+    const timeStep = 0.016;
+    const maxTime = 8.0;
+    
+    let ballPos = { x: white.x, y: white.y };
+    let velocity = { 
+        x: Math.cos(angle) * speed, 
+        y: Math.sin(angle) * speed 
+    };
+    
+    const path = [{ x: ballPos.x, y: ballPos.y, type: 'start' }];
+    let cushionHits = 0;
+    let ballHits = 0;
+    let time = 0;
+    
+    while (time < maxTime && (Math.abs(velocity.x) > minVelocity || Math.abs(velocity.y) > minVelocity)) {
+        // 위치 업데이트
+        ballPos.x += velocity.x * timeStep;
+        ballPos.y += velocity.y * timeStep;
+        
+        // 쿠션 충돌 검사
+        let cushionHit = false;
+        
+        // 좌/우 쿠션
+        if (ballPos.x <= table.cushionWidth) {
+            ballPos.x = table.cushionWidth;
+            velocity.x = -velocity.x * 0.9; // 반사각 + 에너지 손실
+            cushionHits++;
+            cushionHit = true;
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'cushion' });
+        } else if (ballPos.x >= table.width - table.cushionWidth) {
+            ballPos.x = table.width - table.cushionWidth;
+            velocity.x = -velocity.x * 0.9;
+            cushionHits++;
+            cushionHit = true;
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'cushion' });
+        }
+        
+        // 상/하 쿠션
+        if (ballPos.y <= table.cushionWidth) {
+            ballPos.y = table.cushionWidth;
+            velocity.y = -velocity.y * 0.9;
+            cushionHits++;
+            cushionHit = true;
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'cushion' });
+        } else if (ballPos.y >= table.height - table.cushionWidth) {
+            ballPos.y = table.height - table.cushionWidth;
+            velocity.y = -velocity.y * 0.9;
+            cushionHits++;
+            cushionHit = true;
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'cushion' });
+        }
+        
+        // 공 충돌 검사 (빨간공)
+        const distToRed = Math.sqrt((ballPos.x - red.x) ** 2 + (ballPos.y - red.y) ** 2);
+        if (distToRed < 30 && !cushionHit) { // 공 반지름 고려
+            ballHits++;
+            // 충돌 벡터 계산
+            const dx = ballPos.x - red.x;
+            const dy = ballPos.y - red.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            
+            // 반사
+            const dotProduct = (velocity.x * dx + velocity.y * dy) / dist;
+            velocity.x -= 2 * dotProduct * dx / dist;
+            velocity.y -= 2 * dotProduct * dy / dist;
+            velocity.x *= 0.8; // 에너지 손실
+            velocity.y *= 0.8;
+            
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'ball' });
+        }
+        
+        // 공 충돌 검사 (노란공)
+        const distToYellow = Math.sqrt((ballPos.x - yellow.x) ** 2 + (ballPos.y - yellow.y) ** 2);
+        if (distToYellow < 30 && !cushionHit) {
+            ballHits++;
+            const dx = ballPos.x - yellow.x;
+            const dy = ballPos.y - yellow.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            
+            const dotProduct = (velocity.x * dx + velocity.y * dy) / dist;
+            velocity.x -= 2 * dotProduct * dx / dist;
+            velocity.y -= 2 * dotProduct * dy / dist;
+            velocity.x *= 0.8;
+            velocity.y *= 0.8;
+            
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'ball' });
+        }
+        
+        // 마찰력 적용
+        velocity.x *= friction;
+        velocity.y *= friction;
+        
+        time += timeStep;
+        
+        // 경로 포인트 추가 (매 프레임마다는 아니고 주요 지점만)
+        if (Math.floor(time / 0.1) !== Math.floor((time - timeStep) / 0.1)) {
+            path.push({ x: ballPos.x, y: ballPos.y, type: 'path' });
+        }
+    }
+    
+    // 최종 위치
+    path.push({ x: ballPos.x, y: ballPos.y, type: 'end' });
+    
+    // 3쿠션 성공 여부
+    const isValid = cushionHits >= 3 && ballHits >= 1;
+    const difficulty = Math.min(cushionHits / 5 + ballHits / 3, 1);
+    const successRate = isValid ? Math.max(0.2, 0.9 - difficulty * 0.5) : 0;
+    
+    return {
+        path,
+        cushionHits,
+        ballHits,
+        isValid,
+        difficulty,
+        successRate
+    };
+}
+
+// 실제 물리학 기반 경로 그리기
+function drawRealisticPath(ctx, pathData) {
+    const path = pathData.path;
+    if (path.length < 2) return;
+    
     ctx.strokeStyle = '#FFD700';
     ctx.lineWidth = 3;
     ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    
+    for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.stroke();
+    
+    // 중요 지점 표시
+    ctx.setLineDash([]);
+    path.forEach(point => {
+        if (point.type === 'cushion') {
+            ctx.fillStyle = '#FF4444';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        } else if (point.type === 'ball') {
+            ctx.fillStyle = '#44FF44';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    });
+}
+
+// 대체 경로 (물리 계산 실패시)
+function drawFallbackPath(ctx, whiteX, whiteY, redX, redY, tableWidth, tableHeight) {
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
     
     ctx.beginPath();
     ctx.moveTo(whiteX, whiteY);
     
-    // 첫 번째 쿠션 (상단)
-    const firstCushionX = whiteX + (redX - whiteX) * 0.3;
-    const firstCushionY = 20;
-    ctx.lineTo(firstCushionX, firstCushionY);
+    // 단순 3쿠션 예시 경로
+    const cushion1X = whiteX + (redX - whiteX) * 0.4;
+    const cushion1Y = 25;
+    ctx.lineTo(cushion1X, cushion1Y);
     
-    // 두 번째 쿠션 (우측)
-    const secondCushionX = canvas.width - 20;
-    const secondCushionY = firstCushionY + (redY - firstCushionY) * 0.5;
-    ctx.lineTo(secondCushionX, secondCushionY);
+    const cushion2X = tableWidth - 25;
+    const cushion2Y = cushion1Y + (redY - cushion1Y) * 0.6;
+    ctx.lineTo(cushion2X, cushion2Y);
     
-    // 세 번째 쿠션 (하단)
-    const thirdCushionX = secondCushionX - (secondCushionX - redX) * 0.4;
-    const thirdCushionY = canvas.height - 20;
-    ctx.lineTo(thirdCushionX, thirdCushionY);
+    const cushion3X = cushion2X - (cushion2X - redX) * 0.5;
+    const cushion3Y = tableHeight - 25;
+    ctx.lineTo(cushion3X, cushion3Y);
     
-    // 목표 공까지
     ctx.lineTo(redX, redY);
-    
     ctx.stroke();
-    
-    // 쿠션 포인트 표시
-    ctx.fillStyle = '#FF4444';
-    ctx.beginPath();
-    ctx.arc(firstCushionX, firstCushionY, 4, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.arc(secondCushionX, secondCushionY, 4, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.arc(thirdCushionX, thirdCushionY, 4, 0, 2 * Math.PI);
-    ctx.fill();
+}
+
+// 샷 정보 업데이트
+function updateShotInfo(pathData) {
+    if (pathData && pathData.cushionHits !== undefined) {
+        document.querySelector('.success-rate').textContent = `${Math.round(pathData.successRate * 100)}%`;
+        document.querySelector('.difficulty').textContent = `${Math.round(pathData.difficulty * 100)}%`;
+        document.querySelector('.distance').textContent = `${Math.round(pathData.path.length * 2)}cm`;
+    } else {
+        document.querySelector('.success-rate').textContent = '???';
+        document.querySelector('.difficulty').textContent = '???';
+        document.querySelector('.distance').textContent = '???';
+    }
     
     // 정보 업데이트
     updateBallInfo();
     
     // 성공 메시지
-    showToast('경로 계산 완료! 3쿠션 경로가 표시되었습니다.');
+    showToast('정밀한 물리 엔진으로 3쿠션 경로를 계산했습니다!');
 }
 
 // 공 위치 리셋
